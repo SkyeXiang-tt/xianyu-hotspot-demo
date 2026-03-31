@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>热点首页</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --y: #FFE400; --yl: #FFF9D9; --yd: #E6CD00;
+  --r: #FF4D4F; --rb: #FFF1F0; --rl: #FF7875;
+  --g: #52C41A; --gb: #F6FFED; --gl: #73D13D;
+  --bk: #1A1A1A; --g9: #333; --g7: #666; --g5: #999; --g4: #BFBFBF; --g3: #D9D9D9; --g2: #EDEDED; --g1: #F5F5F5; --g0: #FAFAFA;
+  --w: #FFFFFF;
+  --f: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+  --m: 'DM Mono', 'SF Mono', Menlo, monospace;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.06);
+  --radius: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:var(--f); background:#F0EDE8; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+.phone {
+  width:375px; height:812px; background:var(--w); border-radius:48px; overflow:hidden;
+  display:flex; flex-direction:column;
+  box-shadow: 0 0 0 3px #2C2C2C, 0 0 0 6px #1a1a1a, 0 40px 80px rgba(0,0,0,.25), 0 16px 32px rgba(0,0,0,.15);
+}
+@media(max-width:420px){body{background:var(--w)}.phone{width:100vw;height:100dvh;border-radius:0;box-shadow:none}}
+
+/* ---- Status Bar ---- */
+.statusbar {
+  height:54px; display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 28px 8px; font-size:16px; font-weight:600; color:var(--bk);
+  flex-shrink:0; background:var(--w);
+}
+.statusbar .icons { display:flex; gap:4px; align-items:center; }
+.statusbar .icons svg { width:18px; height:14px; }
+
+/* ---- Search ---- */
+.search-wrap { padding:4px 16px 8px; flex-shrink:0; background:var(--w); }
+.search-pill {
+  display:flex; align-items:center; gap:8px;
+  background:var(--g1); border-radius:20px; height:36px; padding:0 14px;
+  transition: background .2s;
+}
+.search-pill svg { width:15px; height:15px; color:var(--g4); flex-shrink:0; }
+.search-pill span { font-size:14px; color:var(--g4); letter-spacing:.2px; }
+
+/* ---- App Tabs ---- */
+.app-tabs {
+  display:flex; padding:0 8px; border-bottom:1px solid var(--g1);
+  flex-shrink:0; overflow-x:auto; scrollbar-width:none; background:var(--w);
+}
+.app-tabs::-webkit-scrollbar{display:none}
+.app-tab {
+  flex-shrink:0; padding:11px 14px 12px; font-size:14px; color:var(--g5);
+  cursor:pointer; position:relative; border:none; background:none;
+  font-family:var(--f); white-space:nowrap; transition: color .2s;
+}
+.app-tab.on { color:var(--bk); font-weight:800; }
+.app-tab.on::after {
+  content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%);
+  width:20px; height:3px; background:var(--y); border-radius:1.5px;
+}
+
+/* ---- Scroll ---- */
+.scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.scroll::-webkit-scrollbar{display:none}
+
+/* ---- Section Head ---- */
+.sec-hd {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 16px 10px;
+}
+.sec-hd .label { font-size:16px; font-weight:800; color:var(--bk); letter-spacing:-.2px; }
+.sec-hd .hint { font-size:11px; color:var(--g5); }
+
+/* ---- Topic Card ---- */
+.topic-card {
+  padding:14px 16px; border-bottom:1px solid var(--g1);
+  cursor:pointer; transition: background .15s; position:relative;
+  animation: fadeUp .4s ease both;
+}
+.topic-card:nth-child(2){animation-delay:.05s}
+.topic-card:nth-child(3){animation-delay:.1s}
+.topic-card:nth-child(4){animation-delay:.15s}
+.topic-card:nth-child(5){animation-delay:.2s}
+.topic-card:active { background:var(--g0); }
+.topic-card .tc-top {
+  display:flex; align-items:flex-start; gap:8px; margin-bottom:5px;
+}
+.topic-card .tag {
+  display:inline-block; font-size:10px; padding:2px 7px; border-radius:4px;
+  font-weight:600; flex-shrink:0; white-space:nowrap; margin-top:2px;
+  letter-spacing:.3px;
+}
+.tag-rise { background:var(--rb); color:var(--r); }
+.tag-fall { background:var(--gb); color:var(--g); }
+.tag-event { background:var(--yl); color:#A08C00; }
+.topic-card .tc-title {
+  font-size:15px; font-weight:600; color:var(--bk); line-height:1.45;
+  flex:1;
+}
+.topic-card .tc-desc {
+  font-size:12px; color:var(--g7); line-height:1.55; margin-bottom:6px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.topic-card .tc-meta {
+  font-size:11px; color:var(--g5); display:flex; gap:10px; align-items:center;
+}
+.topic-card .tc-meta .dot { width:3px; height:3px; border-radius:50%; background:var(--g4); }
+
+/* ---- Divider ---- */
+.divider { height:8px; background:var(--g1); }
+
+/* ---- Inner Tabs ---- */
+.inner-tabs { display:flex; padding:0 16px; background:var(--w); }
+.inner-tab {
+  padding:12px 0; margin-right:28px; font-size:15px; color:var(--g5);
+  cursor:pointer; border:none; background:none; font-family:var(--f);
+  position:relative; transition: color .2s;
+}
+.inner-tab.on { color:var(--bk); font-weight:700; }
+.inner-tab.on::after {
+  content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  width:22px; height:2.5px; background:var(--y); border-radius:2px;
+}
+
+/* ---- Table ---- */
+.table-hd {
+  display:flex; padding:7px 16px; background:var(--g1);
+  font-size:11px; color:var(--g5); font-weight:400;
+}
+.table-hd .c1 { flex:1; }
+.table-hd .c2 { width:80px; text-align:right; }
+.table-hd .c3 { width:58px; text-align:right; }
+
+.table-row {
+  display:flex; align-items:center; padding:12px 16px;
+  border-bottom:1px solid var(--g1); cursor:pointer;
+  transition: background .12s;
+  animation: fadeUp .35s ease both;
+}
+.table-row:active { background:var(--g0); }
+.table-row .rank {
+  width:20px; font-size:14px; font-weight:800; text-align:center;
+  margin-right:10px; flex-shrink:0;
+  font-family:var(--m);
+}
+.table-row .name {
+  flex:1; font-size:14px; font-weight:500; color:var(--bk);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.table-row .price {
+  width:80px; text-align:right; font-family:var(--m);
+  font-size:13px; color:var(--g9); font-weight:400;
+}
+.table-row .change {
+  width:58px; text-align:right; font-family:var(--m);
+  font-size:12px; font-weight:600;
+}
+.up { color:var(--r); }
+.dn { color:var(--g); }
+
+/* ---- Bottom Bar ---- */
+.bottom-bar {
+  display:flex; padding:8px 0 28px; border-top:1px solid var(--g1);
+  flex-shrink:0; background:var(--w);
+}
+.bar-btn {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  gap:3px; border:none; background:none; font-family:var(--f); cursor:pointer;
+}
+.bar-btn svg { width:24px; height:24px; color:var(--g4); transition: color .2s; }
+.bar-btn span { font-size:10px; color:var(--g5); transition: all .2s; }
+.bar-btn.on svg { color:var(--bk); }
+.bar-btn.on span { color:var(--bk); font-weight:700; }
+.bar-btn.pub-btn .pub-circle {
+  width:42px; height:42px; border-radius:50%; background:var(--y);
+  display:flex; align-items:center; justify-content:center;
+  margin-top:-12px;
+  box-shadow: 0 4px 12px rgba(255,228,0,.5), 0 1px 3px rgba(0,0,0,.08);
+  transition: transform .15s, box-shadow .15s;
+}
+.bar-btn.pub-btn .pub-circle:active { transform:scale(.92); }
+.bar-btn.pub-btn .pub-circle svg { color:var(--bk); width:20px; height:20px; }
+
+/* ---- Animations ---- */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="phone">
+  <!-- Status Bar -->
+  <div class="statusbar">
+    <span>9:41</span>
+    <div class="icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <div class="search-pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>搜索</span>
+    </div>
+  </div>
+
+  <!-- App Tabs -->
+  <div class="app-tabs">
+    <button class="app-tab">逛逛神器</button>
+    <button class="app-tab">找服务</button>
+    <button class="app-tab on">热点</button>
+    <button class="app-tab">游戏</button>
+    <button class="app-tab">数码</button>
+    <button class="app-tab">玩乐</button>
+  </div>
+
+  <!-- Content -->
+  <div class="scroll">
+    <!-- 热点话题 -->
+    <div class="sec-hd"><span class="label">热点话题</span><span class="hint">由宝贝价格信号生成</span></div>
+
+    <div class="topic-card">
+      <div class="tc-top"><span class="tag tag-rise">涨价行情</span><span class="tc-title">#耐克华夫饼跑鞋 闲鱼价一周涨5.8%</span></div>
+      <div class="tc-desc">复古跑鞋品类需求上升，社媒穿搭博主带火"复古运动风"，供需比降至0.7</div>
+      <div class="tc-meta"><span>3个关联宝贝</span><span class="dot"></span><span>搜索↑32%</span></div>
+    </div>
+    <div class="topic-card">
+      <div class="tc-top"><span class="tag tag-fall">跌价行情</span><span class="tc-title">#Cracle Coin 限定宝盒 价格回调</span></div>
+      <div class="tc-desc">新品上市后首批溢价空间消化，市场回归理性定价</div>
+      <div class="tc-meta"><span>1个关联宝贝</span><span class="dot"></span><span>供需比1.2</span></div>
+    </div>
+    <div class="topic-card">
+      <div class="tc-top"><span class="tag tag-rise">涨价行情</span><span class="tc-title">#Nintendo Switch 停产消息推高二手价</span></div>
+      <div class="tc-desc">任天堂宣布停产消息，二手供给收紧，价格快速上涨</div>
+      <div class="tc-meta"><span>2个关联宝贝</span><span class="dot"></span><span>搜索↑89%</span></div>
+    </div>
+    <div class="topic-card">
+      <div class="tc-top"><span class="tag tag-event">事件行情</span><span class="tc-title">#AirPods Pro 2 新款发布旧款升温</span></div>
+      <div class="tc-desc">新款发布带动旧款需求，性价比优势凸显</div>
+      <div class="tc-meta"><span>1个关联宝贝</span><span class="dot"></span><span>搜索↑15%</span></div>
+    </div>
+    <div class="topic-card">
+      <div class="tc-top"><span class="tag tag-fall">跌价行情</span><span class="tc-title">#iPhone 15 Pro 进入贬值周期</span></div>
+      <div class="tc-desc">iPhone 17系列发布在即，旧款开始进入贬值通道</div>
+      <div class="tc-meta"><span>1个关联宝贝</span><span class="dot"></span><span>供需比1.4</span></div>
+    </div>
+
+    <!-- Divider -->
+    <div class="divider"></div>
+
+    <!-- 热点宝贝价格 -->
+    <div class="sec-hd" style="padding-bottom:0"><span class="label">热点宝贝价格</span></div>
+    <div class="inner-tabs">
+      <button class="inner-tab on" onclick="switchTab('mkt',this)">市场价格</button>
+      <button class="inner-tab" onclick="switchTab('fol',this)">我的关注</button>
+    </div>
+    <div class="table-hd"><span class="c1">热点宝贝</span><span class="c2">闲鱼价</span><span class="c3">涨跌</span></div>
+    <div id="price-list"></div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <button class="bar-btn on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>首页</span></button>
+    <button class="bar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg><span>同城</span></button>
+    <button class="bar-btn pub-btn"><div class="pub-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span>发布</span></button>
+    <button class="bar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>消息</span></button>
+    <button class="bar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>我的</span></button>
+  </div>
+</div>
+
+<script>
+const marketData = [
+  { n:'Nintendo Switch', p:'¥1,850', c:'+8.2%', u:1 },
+  { n:'Labubu 毛绒公仔', p:'¥680', c:'+6.7%', u:1 },
+  { n:'Nike Waffle One 小白鞋', p:'¥580', c:'+5.8%', u:1 },
+  { n:'Dyson V15 吸尘器', p:'¥2,450', c:'+5.3%', u:1 },
+  { n:'PS5 Pro', p:'¥3,200', c:'+4.8%', u:1 },
+  { n:'AirPods Pro 2', p:'¥1,050', c:'+3.5%', u:1 },
+  { n:'Cracle Coin IP限定宝盒', p:'¥380', c:'-3.2%', u:0 },
+  { n:'iPhone 15 Pro', p:'¥6,800', c:'-2.1%', u:0 },
+  { n:'MacBook Air M2', p:'¥6,200', c:'-1.8%', u:0 },
+  { n:'iPad Pro M4', p:'¥5,900', c:'-1.5%', u:0 },
+];
+const followData = [
+  { n:'Nike Waffle One 小白鞋', p:'¥580', c:'+5.8%', u:1 },
+  { n:'Nintendo Switch', p:'¥1,850', c:'+8.2%', u:1 },
+  { n:'Cracle Coin IP限定宝盒', p:'¥380', c:'-3.2%', u:0 },
+  { n:'AirPods Pro 2', p:'¥1,050', c:'+3.5%', u:1 },
+  { n:'Labubu 毛绒公仔', p:'¥680', c:'+6.7%', u:1 },
+  { n:'iPhone 15 Pro', p:'¥6,800', c:'-2.1%', u:0 },
+];
+
+function renderList(data) {
+  const el = document.getElementById('price-list');
+  el.innerHTML = data.map((x, i) => {
+    const rankColors = ['var(--r)', 'var(--r)', 'var(--r)'];
+    const rc = i < 3 ? (x.u ? 'var(--r)' : 'var(--g)') : 'var(--g4)';
+    return `<div class="table-row" style="animation-delay:${i * .03}s">
+      <span class="rank" style="color:${rc}">${i + 1}</span>
+      <span class="name">${x.n}</span>
+      <span class="price">${x.p}</span>
+      <span class="change ${x.u ? 'up' : 'dn'}">${x.c}</span>
+    </div>`;
+  }).join('');
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.inner-tab').forEach(x => x.classList.remove('on'));
+  btn.classList.add('on');
+  renderList(tab === 'mkt' ? marketData : followData);
+}
+
+renderList(marketData);
+</script>
+</body>
+</html>

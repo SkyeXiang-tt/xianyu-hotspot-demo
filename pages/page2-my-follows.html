@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>我的关注</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --y:#FFE400;--yl:#FFF9D9;--r:#FF4D4F;--rb:#FFF1F0;--g:#52C41A;--gb:#F6FFED;
+  --bk:#1A1A1A;--g9:#333;--g7:#666;--g5:#999;--g4:#BFBFBF;--g3:#D9D9D9;--g2:#EDEDED;--g1:#F5F5F5;--g0:#FAFAFA;--w:#fff;
+  --f:'Noto Sans SC',-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;
+  --m:'DM Mono','SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--f);background:#F0EDE8;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.phone{width:375px;height:812px;background:var(--w);border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 3px #2C2C2C,0 0 0 6px #1a1a1a,0 40px 80px rgba(0,0,0,.25),0 16px 32px rgba(0,0,0,.15)}
+@media(max-width:420px){body{background:var(--w)}.phone{width:100vw;height:100dvh;border-radius:0;box-shadow:none}}
+
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 8px;font-size:16px;font-weight:600;color:var(--bk);flex-shrink:0}
+.statusbar .icons{display:flex;gap:4px;align-items:center}
+.statusbar .icons svg{width:18px;height:14px}
+
+.navbar{display:flex;align-items:center;height:48px;padding:0 16px;flex-shrink:0;background:var(--w)}
+.navbar .back{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;border-radius:8px;transition:background .15s}
+.navbar .back:active{background:var(--g1)}
+.navbar .back svg{width:20px;height:20px;color:var(--bk)}
+.navbar .title{flex:1;text-align:center;font-size:17px;font-weight:700;color:var(--bk);margin:0 8px;letter-spacing:-.2px}
+.navbar .right{display:flex;gap:14px;align-items:center}
+.navbar .right .edit{font-size:14px;color:var(--g7);cursor:pointer;font-weight:500}
+.navbar .right .add-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;border-radius:6px;transition:background .15s}
+.navbar .right .add-btn:active{background:var(--g1)}
+.navbar .right .add-btn svg{width:20px;height:20px;color:var(--g7)}
+
+.filters{display:flex;gap:8px;padding:10px 16px;border-bottom:1px solid var(--g1);flex-shrink:0}
+.chip{padding:6px 18px;border-radius:18px;font-size:13px;color:var(--g7);background:var(--g1);border:none;cursor:pointer;font-family:var(--f);font-weight:500;transition:all .2s}
+.chip.on{background:var(--bk);color:var(--w);font-weight:600}
+.chip:active{transform:scale(.96)}
+
+.overview{padding:10px 16px;font-size:13px;color:var(--g5);border-bottom:1px solid var(--g1);flex-shrink:0;display:flex;align-items:center;gap:4px}
+.overview .uc{color:var(--r);font-weight:700;font-family:var(--m)}
+.overview .dc{color:var(--g);font-weight:700;font-family:var(--m)}
+
+.table-hd{display:flex;padding:7px 16px;background:var(--g1);font-size:11px;color:var(--g5);flex-shrink:0}
+.table-hd .c1{flex:1}.table-hd .c2{width:80px;text-align:right}.table-hd .c3{width:58px;text-align:right}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+.table-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--g1);cursor:pointer;transition:background .12s;animation:fadeUp .35s ease both}
+.table-row:active{background:var(--g0)}
+.table-row .name{flex:1;font-size:14px;font-weight:500;color:var(--bk);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.table-row .price{width:80px;text-align:right;font-family:var(--m);font-size:13px;color:var(--g9)}
+.table-row .change{width:58px;text-align:right;font-family:var(--m);font-size:12px;font-weight:600}
+.up{color:var(--r)}.dn{color:var(--g)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><div class="icons"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg></div></div>
+
+  <div class="navbar">
+    <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <span class="title">我的关注</span>
+    <div class="right">
+      <span class="edit">编辑</span>
+      <button class="add-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    </div>
+  </div>
+
+  <div class="filters" id="ff">
+    <button class="chip on" onclick="flt('all',this)">全部</button>
+    <button class="chip" onclick="flt('up',this)">涨</button>
+    <button class="chip" onclick="flt('down',this)">跌</button>
+  </div>
+
+  <div class="overview">今日 <span class="uc">4涨</span> <span class="dc">2跌</span></div>
+  <div class="table-hd"><span class="c1">热点宝贝</span><span class="c2">闲鱼价</span><span class="c3">涨跌</span></div>
+
+  <div class="scroll" id="list"></div>
+</div>
+
+<script>
+const data=[
+  {n:'Nike Waffle One 小白鞋',p:'¥580',c:'+5.8%',u:1},
+  {n:'Nintendo Switch',p:'¥1,850',c:'+8.2%',u:1},
+  {n:'Cracle Coin IP限定宝盒',p:'¥380',c:'-3.2%',u:0},
+  {n:'AirPods Pro 2',p:'¥1,050',c:'+3.5%',u:1},
+  {n:'Labubu 毛绒公仔',p:'¥680',c:'+6.7%',u:1},
+  {n:'iPhone 15 Pro',p:'¥6,800',c:'-2.1%',u:0},
+];
+function render(f){
+  let d=data;
+  if(f==='up')d=d.filter(x=>x.u);
+  if(f==='down')d=d.filter(x=>!x.u);
+  document.getElementById('list').innerHTML=d.map((x,i)=>
+    `<div class="table-row" style="animation-delay:${i*.04}s"><span class="name">${x.n}</span><span class="price">${x.p}</span><span class="change ${x.u?'up':'dn'}">${x.c}</span></div>`
+  ).join('');
+}
+function flt(f,b){
+  document.querySelectorAll('#ff .chip').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');render(f);
+}
+render('all');
+</script>
+</body>
+</html>

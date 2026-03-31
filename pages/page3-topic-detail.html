@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>热点话题详情</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --y:#FFE400;--yl:#FFF9D9;--yd:#E6CD00;--r:#FF4D4F;--rb:#FFF1F0;--g:#52C41A;--gb:#F6FFED;
+  --bk:#1A1A1A;--g9:#333;--g7:#666;--g5:#999;--g4:#BFBFBF;--g3:#D9D9D9;--g2:#EDEDED;--g1:#F5F5F5;--g0:#FAFAFA;--w:#fff;
+  --f:'Noto Sans SC',-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;
+  --m:'DM Mono','SF Mono',Menlo,monospace;
+  --purple:#7C5CFC;--purple-bg:#F8F6FF;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--f);background:#F0EDE8;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.phone{width:375px;height:812px;background:var(--w);border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 3px #2C2C2C,0 0 0 6px #1a1a1a,0 40px 80px rgba(0,0,0,.25),0 16px 32px rgba(0,0,0,.15)}
+@media(max-width:420px){body{background:var(--w)}.phone{width:100vw;height:100dvh;border-radius:0;box-shadow:none}}
+
+.statusbar{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 8px;font-size:16px;font-weight:600;flex-shrink:0}
+.statusbar .icons{display:flex;gap:4px;align-items:center}
+.statusbar .icons svg{width:18px;height:14px}
+
+.navbar{display:flex;align-items:center;height:48px;padding:0 16px;flex-shrink:0}
+.navbar .back{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;border-radius:8px;transition:background .15s}
+.navbar .back:active{background:var(--g1)}
+.navbar .back svg{width:20px;height:20px;color:var(--bk)}
+.navbar .title{flex:1;text-align:center;font-size:16px;font-weight:700;color:var(--bk);margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.navbar .right svg{width:22px;height:22px;color:var(--g5);cursor:pointer}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* Topic Header */
+.topic-hd{padding:18px 16px 16px;border-bottom:1px solid var(--g1);animation:fadeUp .4s ease both}
+.topic-hd .headline{font-size:18px;font-weight:800;color:var(--bk);line-height:1.45;margin-bottom:10px;letter-spacing:-.3px}
+.topic-hd .summary{font-size:13px;color:var(--g7);line-height:1.65;margin-bottom:12px}
+.topic-hd .tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:4px;font-weight:600;letter-spacing:.3px}
+.tag-rise{background:var(--rb);color:var(--r)}
+.tag-fall{background:var(--gb);color:var(--g)}
+.tag-neutral{background:var(--g1);color:var(--g7)}
+
+/* Section */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px}
+.sec-hd .label{font-size:15px;font-weight:700;color:var(--bk)}
+.sec-hd .hint{font-size:11px;color:var(--g5)}
+
+/* SPU Row */
+.spu-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--g1);cursor:pointer;transition:background .12s;animation:fadeUp .35s ease both}
+.spu-row:nth-child(2){animation-delay:.05s}
+.spu-row:nth-child(3){animation-delay:.1s}
+.spu-row:active{background:var(--g0)}
+.spu-row .emoji{font-size:28px;margin-right:12px;flex-shrink:0}
+.spu-row .info{flex:1;min-width:0}
+.spu-row .info .name{font-size:14px;font-weight:600;color:var(--bk);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spu-row .info .sub{font-size:11px;color:var(--g5)}
+.spu-row .pct{font-family:var(--m);font-size:14px;font-weight:600;margin-left:10px;flex-shrink:0}
+.up{color:var(--r)}.dn{color:var(--g)}
+
+/* Chart */
+.chart-section{padding:0 16px 16px;border-top:8px solid var(--g1);animation:fadeUp .4s ease both;animation-delay:.1s}
+.chart-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px}
+.chart-hd .t{font-size:14px;font-weight:700;color:var(--bk)}
+.period-tabs{display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--g3)}
+.period-tab{font-size:11px;padding:4px 12px;border:none;background:var(--w);color:var(--g7);cursor:pointer;font-family:var(--f);font-weight:500;transition:all .15s}
+.period-tab+.period-tab{border-left:1px solid var(--g3)}
+.period-tab.on{background:var(--y);color:var(--bk);font-weight:700;border-color:var(--y)}
+.chart-box{width:100%;height:170px;border-radius:8px;overflow:hidden;background:var(--g0)}
+.chart-box canvas{width:100%;height:100%}
+
+/* Analysis */
+.analysis{padding:16px;border-top:8px solid var(--g1);animation:fadeUp .4s ease both;animation-delay:.15s}
+.analysis .at{font-size:15px;font-weight:700;color:var(--bk);margin-bottom:10px}
+.analysis .ab{font-size:13px;color:var(--g7);line-height:1.75}
+.prompt-box{margin-top:14px;padding:12px 14px;background:var(--purple-bg);border-radius:10px;border-left:3px solid var(--purple)}
+.prompt-box .pl{font-size:10px;color:var(--purple);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px}
+.prompt-box .pt{font-size:11px;color:var(--g7);line-height:1.65;font-family:var(--m);word-break:break-all}
+
+/* Rules */
+.rules-section{padding:16px;border-top:8px solid var(--g1);animation:fadeUp .4s ease both;animation-delay:.2s}
+.rules-section .rt{font-size:14px;font-weight:700;color:var(--bk);margin-bottom:10px}
+.rule-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--g1);font-size:12px}
+.rule-row:last-child{border-bottom:none}
+.rule-row .rp{width:30px;font-weight:800;color:var(--purple);flex-shrink:0;font-family:var(--m)}
+.rule-row .rn{width:72px;font-weight:600;color:var(--bk);flex-shrink:0}
+.rule-row .rc{flex:1;color:var(--g7)}
+.rule-row .rs{width:44px;text-align:right;flex-shrink:0;font-weight:700;font-size:11px}
+.rs-hit{color:var(--r)}
+.rs-miss{color:var(--g4)}
+
+/* Related Products */
+.prod-row{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--g1);cursor:pointer;transition:background .12s}
+.prod-row:active{background:var(--g0)}
+.prod-row .emoji{font-size:22px;margin-right:10px;flex-shrink:0}
+.prod-row .info{flex:1;min-width:0}
+.prod-row .info .name{font-size:13px;font-weight:500;color:var(--bk);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prod-row .info .sub{font-size:11px;color:var(--g5);margin-top:2px}
+
+/* CTA */
+.cta-bar{display:flex;gap:8px;padding:12px 16px 32px;border-top:1px solid var(--g1);flex-shrink:0;background:var(--w)}
+.cta-main{flex:2;padding:13px;border-radius:12px;border:none;background:var(--y);color:var(--bk);font-size:16px;font-weight:700;cursor:pointer;font-family:var(--f);transition:all .15s}
+.cta-main:active{background:var(--yd);transform:scale(.98)}
+.cta-sub{flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--g3);background:var(--w);color:var(--g7);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f);transition:all .15s}
+.cta-sub:active{background:var(--g0);transform:scale(.98)}
+
+.divider{height:8px;background:var(--g1)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><div class="icons"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg></div></div>
+
+  <div class="navbar">
+    <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <span class="title">耐克华夫饼跑鞋涨价</span>
+    <div class="right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></div>
+  </div>
+
+  <div class="scroll">
+    <!-- Topic Header -->
+    <div class="topic-hd">
+      <div class="headline">#耐克华夫饼跑鞋 闲鱼价一周涨5.8%</div>
+      <div class="summary">复古跑鞋品类季节性需求上升，叠加社媒穿搭博主带火"复古运动风"，供需比降至0.7，卖方市场特征明显。搜索量7日环比+32%。</div>
+      <div class="tags">
+        <span class="tag tag-rise">涨价行情</span>
+        <span class="tag tag-neutral">供需比 0.7</span>
+        <span class="tag tag-neutral">搜索↑32%</span>
+      </div>
+    </div>
+
+    <!-- Related SPUs -->
+    <div class="sec-hd"><span class="label">关联热点宝贝</span><span class="hint">价格趋势</span></div>
+    <div class="spu-row">
+      <span class="emoji">👟</span>
+      <div class="info"><div class="name">Nike Waffle One 小白鞋</div><div class="sub">闲鱼价 ¥420~580 · 近30日成交 512 笔</div></div>
+      <span class="pct up">↑5.8%</span>
+    </div>
+    <div class="spu-row">
+      <span class="emoji">👟</span>
+      <div class="info"><div class="name">Nike Daybreak 复古跑鞋</div><div class="sub">闲鱼价 ¥350~450 · 近30日成交 198 笔</div></div>
+      <span class="pct up">↑4.1%</span>
+    </div>
+    <div class="spu-row">
+      <span class="emoji">👟</span>
+      <div class="info"><div class="name">Nike Sacai 联名华夫</div><div class="sub">闲鱼价 ¥680~920 · 近30日成交 87 笔</div></div>
+      <span class="pct up">↑7.2%</span>
+    </div>
+
+    <!-- Price Chart -->
+    <div class="chart-section">
+      <div class="chart-hd">
+        <span class="t">价格走势（话题均价）</span>
+        <div class="period-tabs">
+          <button class="period-tab" onclick="drawChart(7,this)">7日</button>
+          <button class="period-tab on" onclick="drawChart(30,this)">30日</button>
+          <button class="period-tab" onclick="drawChart(90,this)">90日</button>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="cv"></canvas></div>
+    </div>
+
+    <!-- Market Analysis -->
+    <div class="analysis">
+      <div class="at">市场解读</div>
+      <div class="ab">耐克华夫饼跑鞋闲鱼价近7天上涨5.8%，复古跑鞋品类季节性需求上升，叠加社媒穿搭博主带火"复古运动风"，供需比降至0.7，卖方市场特征明显。搜索量7日环比+32%，市场热度持续升温，短期仍有上行空间。</div>
+      <div class="prompt-box">
+        <div class="pl">生成该解读的 Prompt</div>
+        <div class="pt">待提供：需要你提供用于生成市场解读的prompt模板，包含输入变量（品类、价格、涨跌幅、供需比、搜索量等）和输出格式要求。</div>
+      </div>
+    </div>
+
+    <!-- Signal Rules -->
+    <div class="rules-section">
+      <div class="rt">该话题命中的规则</div>
+      <div class="rule-row"><span class="rp">R1</span><span class="rn">价格异动</span><span class="rc">待提供具体规则阈值</span><span class="rs rs-hit">命中</span></div>
+      <div class="rule-row"><span class="rp">R2</span><span class="rn">供需失衡</span><span class="rc">待提供具体规则阈值</span><span class="rs rs-hit">命中</span></div>
+      <div class="rule-row"><span class="rp">R3</span><span class="rn">搜索飙升</span><span class="rc">待提供具体规则阈值</span><span class="rs rs-hit">命中</span></div>
+      <div class="rule-row"><span class="rp">R4</span><span class="rn">事件驱动</span><span class="rc">待提供</span><span class="rs rs-miss">未命中</span></div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="divider"></div>
+    <div class="sec-hd"><span class="label">同款相关商品</span></div>
+    <div class="prod-row"><span class="emoji">👟</span><div class="info"><div class="name">Nike Waffle One 复古华夫饼 全新</div><div class="sub">¥399 · 包邮</div></div></div>
+    <div class="prod-row"><span class="emoji">👟</span><div class="info"><div class="name">耐克华夫饼跑鞋 95新 42码</div><div class="sub">¥320 · 自提</div></div></div>
+    <div class="prod-row"><span class="emoji">👟</span><div class="info"><div class="name">Nike Daybreak 白灰色 女款37</div><div class="sub">¥280 · 包邮</div></div></div>
+    <div style="height:20px"></div>
+  </div>
+
+  <div class="cta-bar">
+    <button class="cta-main">一键发布</button>
+    <button class="cta-sub">关注话题 +</button>
+  </div>
+</div>
+
+<script>
+function genData(n,base,vol){const d=[base];for(let i=1;i<n;i++)d.push(d[i-1]+(Math.random()-.44)*vol);return d}
+function drawCanvas(cv,data,color){
+  if(!cv)return;
+  const ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1,rect=cv.parentElement.getBoundingClientRect();
+  cv.width=rect.width*dpr;cv.height=rect.height*dpr;
+  cv.style.width=rect.width+'px';cv.style.height=rect.height+'px';
+  ctx.scale(dpr,dpr);
+  const w=rect.width,h=rect.height;
+  ctx.clearRect(0,0,w,h);
+  const mn=Math.min(...data),mx=Math.max(...data),rng=mx-mn||1,pad=10;
+  const pts=data.map((v,i)=>({x:(i/(data.length-1))*w,y:pad+(1-(v-mn)/rng)*(h-pad*2)}));
+  // gradient fill
+  ctx.beginPath();ctx.moveTo(pts[0].x,h);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,h);ctx.closePath();
+  const gr=ctx.createLinearGradient(0,0,0,h);gr.addColorStop(0,color+'18');gr.addColorStop(1,color+'02');ctx.fillStyle=gr;ctx.fill();
+  // smooth line
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const xc=(pts[i-1].x+pts[i].x)/2,yc=(pts[i-1].y+pts[i].y)/2;ctx.quadraticCurveTo(pts[i-1].x,pts[i-1].y,xc,yc)}
+  ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.lineCap='round';ctx.stroke();
+  // end dot
+  const last=pts[pts.length-1];
+  ctx.beginPath();ctx.arc(last.x,last.y,4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+  ctx.beginPath();ctx.arc(last.x,last.y,6,0,Math.PI*2);ctx.fillStyle=color+'30';ctx.fill();
+}
+function drawChart(days,btn){
+  btn.parentElement.querySelectorAll('.period-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  drawCanvas(document.getElementById('cv'),genData(days,520,18),'#FF4D4F');
+}
+setTimeout(()=>drawCanvas(document.getElementById('cv'),genData(30,520,18),'#FF4D4F'),80);
+</script>
+</body>
+</html>

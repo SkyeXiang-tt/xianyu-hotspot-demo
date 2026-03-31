@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>商品详情页（主态）</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --y:#FFE400;--yl:#FFF9D9;--r:#FF4D4F;--rb:#FFF1F0;--g:#52C41A;--gb:#F6FFED;
+  --bk:#1A1A1A;--g9:#333;--g7:#666;--g5:#999;--g4:#BFBFBF;--g3:#D9D9D9;--g2:#EDEDED;--g1:#F5F5F5;--g0:#FAFAFA;--w:#fff;
+  --f:'Noto Sans SC',-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;
+  --m:'DM Mono','SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--f);background:#F0EDE8;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.phone{width:375px;height:812px;background:var(--w);border-radius:48px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 3px #2C2C2C,0 0 0 6px #1a1a1a,0 40px 80px rgba(0,0,0,.25),0 16px 32px rgba(0,0,0,.15)}
+@media(max-width:420px){body{background:var(--w)}.phone{width:100vw;height:100dvh;border-radius:0;box-shadow:none}}
+
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* Hero */
+.hero {
+  width:100%; height:360px; position:relative; overflow:hidden;
+  background: linear-gradient(165deg, #F5EDE3 0%, #E8DDD0 35%, #DDD2C3 70%, #D4C8B8 100%);
+}
+.hero::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse at 60% 50%, rgba(255,228,0,.06), transparent 65%);
+}
+.hero::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:80px;
+  background: linear-gradient(transparent, rgba(255,255,255,.3));
+}
+.hero .status {
+  position:absolute; top:0; left:0; right:0; z-index:10;
+  height:54px; display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 28px 8px; font-size:16px; font-weight:600; color:var(--w);
+}
+.hero .status .icons { display:flex; gap:4px; align-items:center; }
+.hero .status .icons svg { width:18px; height:14px; fill:var(--w); }
+.hero .back-btn {
+  position:absolute; top:52px; left:18px; z-index:10;
+  width:36px; height:36px; border-radius:50%;
+  background:rgba(0,0,0,.3); backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; border:none;
+  transition: transform .15s, background .15s;
+}
+.hero .back-btn:active { transform:scale(.9); background:rgba(0,0,0,.5); }
+.hero .back-btn svg { width:20px; height:20px; color:var(--w); }
+.hero .product-emoji {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-size:140px;
+  filter: drop-shadow(0 12px 30px rgba(0,0,0,.08));
+  animation: floatIn .6s ease both;
+}
+
+/* Product Info */
+.pinfo { padding:18px 16px 16px; animation:fadeUp .4s ease both; }
+.pinfo .price {
+  font-family:var(--m); font-size:28px; font-weight:700; color:var(--r);
+  margin-bottom:8px; letter-spacing:-.5px;
+}
+.pinfo .title {
+  font-size:15px; color:var(--bk); line-height:1.5; font-weight:500;
+  margin-bottom:10px;
+}
+.pinfo .badges { display:flex; gap:6px; }
+.pinfo .badge {
+  font-size:11px; padding:3px 10px; border-radius:4px; font-weight:500;
+}
+.badge-y { background:var(--yl); color:#9A7800; }
+.badge-g { background:var(--g1); color:var(--g7); }
+
+/* Trend Card */
+.trend-card {
+  margin:6px 16px 18px; padding:14px 14px 12px;
+  border:1px solid var(--g2); border-radius:14px;
+  background:var(--w); cursor:pointer;
+  transition: all .2s;
+  animation:fadeUp .4s ease both; animation-delay:.1s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.03);
+}
+.trend-card:active { background:var(--g0); transform:scale(.99); box-shadow:none; }
+.trend-card .tc-hd {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+}
+.trend-card .tc-label {
+  font-size:14px; font-weight:700; color:var(--bk);
+  display:flex; align-items:center; gap:7px;
+}
+.trend-card .tc-dot {
+  width:8px; height:8px; border-radius:50%; background:var(--y);
+  box-shadow: 0 0 6px rgba(255,228,0,.6);
+}
+.trend-card .tc-arrow { color:var(--g4); font-size:20px; font-weight:300; }
+.trend-card .tc-chart { width:100%; height:56px; margin-bottom:10px; border-radius:6px; overflow:hidden; }
+.trend-card .tc-chart canvas { width:100%; height:100%; }
+.trend-card .tc-footer {
+  display:flex; justify-content:space-between; font-size:11px; color:var(--g5);
+}
+.trend-card .tc-footer .val { font-family:var(--m); font-weight:600; color:var(--bk); }
+.up { color:var(--r); }
+
+/* Detail Section */
+.detail-sec {
+  padding:18px 16px; border-top:8px solid var(--g1);
+  animation:fadeUp .4s ease both; animation-delay:.15s;
+}
+.detail-sec .dt { font-size:15px; font-weight:700; color:var(--bk); margin-bottom:12px; }
+.detail-sec .dd { font-size:13px; color:var(--g7); line-height:2.1; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes floatIn { from{opacity:0;transform:translate(-50%,-45%) scale(.9)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="scroll">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="status">
+        <span>9:41</span>
+        <div class="icons">
+          <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.24 4.24 0 00-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+        </div>
+      </div>
+      <button class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <span class="product-emoji">👟</span>
+    </div>
+
+    <!-- Product Info -->
+    <div class="pinfo">
+      <div class="price">¥399</div>
+      <div class="title">Nike Waffle One 小白鞋 复古华夫饼跑鞋 男女同款 DC0481-100</div>
+      <div class="badges">
+        <span class="badge badge-y">正品鉴定</span>
+        <span class="badge badge-g">7天无理由</span>
+      </div>
+    </div>
+
+    <!-- Trend Card Entry -->
+    <div class="trend-card">
+      <div class="tc-hd">
+        <div class="tc-label"><span class="tc-dot"></span>热点行情趋势</div>
+        <span class="tc-arrow">›</span>
+      </div>
+      <div class="tc-chart"><canvas id="cv"></canvas></div>
+      <div class="tc-footer">
+        <span>近30日最低 <span class="val">¥350</span></span>
+        <span>近30日最高 <span class="val">¥580</span></span>
+        <span class="val up">↑5.8%</span>
+      </div>
+    </div>
+
+    <!-- Product Detail -->
+    <div class="detail-sec">
+      <div class="dt">商品详情</div>
+      <div class="dd">
+        <p>品牌：Nike</p>
+        <p>型号：Waffle One</p>
+        <p>货号：DC0481-100</p>
+        <p>配色：White/Orange</p>
+        <p>鞋面材质：网布+绒面革</p>
+        <p>鞋底：华夫格橡胶外底</p>
+        <p>尺码：36-45</p>
+        <p>成色：全新</p>
+      </div>
+    </div>
+    <div style="height:40px"></div>
+  </div>
+</div>
+
+<script>
+function genData(n,base,vol){const d=[base];for(let i=1;i<n;i++)d.push(d[i-1]+(Math.random()-.44)*vol);return d}
+function drawCanvas(cv,data,color){
+  if(!cv)return;
+  const ctx=cv.getContext('2d'),dpr=window.devicePixelRatio||1,rect=cv.parentElement.getBoundingClientRect();
+  cv.width=rect.width*dpr;cv.height=rect.height*dpr;
+  cv.style.width=rect.width+'px';cv.style.height=rect.height+'px';
+  ctx.scale(dpr,dpr);
+  const w=rect.width,h=rect.height;ctx.clearRect(0,0,w,h);
+  const mn=Math.min(...data),mx=Math.max(...data),rng=mx-mn||1,pad=6;
+  const pts=data.map((v,i)=>({x:(i/(data.length-1))*w,y:pad+(1-(v-mn)/rng)*(h-pad*2)}));
+  ctx.beginPath();ctx.moveTo(pts[0].x,h);pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,h);ctx.closePath();
+  const gr=ctx.createLinearGradient(0,0,0,h);gr.addColorStop(0,color+'18');gr.addColorStop(1,color+'02');ctx.fillStyle=gr;ctx.fill();
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const xc=(pts[i-1].x+pts[i].x)/2,yc=(pts[i-1].y+pts[i].y)/2;ctx.quadraticCurveTo(pts[i-1].x,pts[i-1].y,xc,yc)}
+  ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);
+  ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.lineCap='round';ctx.stroke();
+  const last=pts[pts.length-1];
+  ctx.beginPath();ctx.arc(last.x,last.y,3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+}
+setTimeout(()=>drawCanvas(document.getElementById('cv'),genData(20,420,20),'#FF4D4F'),100);
+</script>
+</body>
+</html>
